@@ -8,16 +8,24 @@ public class Card {
 	public String name;
 	public int id;
 	public Suit suit;
+	public Color color;
 	public int pointValue;
-	public boolean faceUp;
+	public boolean faceUp;	
 	
 	/***
 	 * Suit was made static so it could be accessed throughout the program
-	 * using Suit.ENUMVALUE.
-	 *
+	 * using Card.Suit.EnumVal.
 	 */
 	public static enum Suit {
 		SPADE, CLUB, HEART, DIAMOND 
+	}
+	
+	/***
+	 * Color was made static so it could be accessed throughout the
+	 * program using Card.Color.EnumVal 
+	 */
+	public static enum Color {
+		RED, BLACK
 	}
 	
 	/***
@@ -33,5 +41,10 @@ public class Card {
 		this.id = id;
 		this.pointValue = value;
 		this.suit = suit;
+		if ( suit == Suit.CLUB || suit == Suit.SPADE )
+			this.color = Color.BLACK;
+		else
+			this.color = Color.RED;
+		
 	}
 }
