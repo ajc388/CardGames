@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /***
  * A class that stores all data related to a casino playing card.
  * @author sudoninja
@@ -9,7 +11,7 @@ public class Card {
 	public int id;
 	public Suit suit;
 	public Color color;
-	public int pointValue;
+	public ArrayList<Integer> pointValue;
 	public boolean faceUp;	
 	
 	/***
@@ -32,14 +34,14 @@ public class Card {
 	 * 
 	 * @param name should be a string literal like: "Ace", "Queen", "Jack", "One", etc...
 	 * @param id should be a value 1-13 representing a unique ID of the card.
-	 * @param value a point value used for the calculation of a winning hand.
+	 * @param points a point value used for the calculation of a winning hand.
 	 * @param suit any enumeration of suit.
 	 */
-	public Card(String name, int id, int value, Suit suit)
+	public Card(String name, int id, ArrayList<Integer> points, Suit suit)
 	{
 		this.name = name;
 		this.id = id;
-		this.pointValue = value;
+		this.pointValue = points;
 		this.suit = suit;
 		if ( suit == Suit.CLUB || suit == Suit.SPADE )
 			this.color = Color.BLACK;
