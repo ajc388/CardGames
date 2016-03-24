@@ -43,7 +43,8 @@ public class Deck {
 	 * Randomly shuffles the deck.
 	 */
 	//This is an O(n^2) shuffling algorithm.
-	//It is not efficient, but is simple enough to get the job done.
+	//It is not efficient, but is simple enough to get the job done,
+	//regardless of deck size.
 	public void shuffle()
 	{
 		for(int i=0; i<deck.size(); i++) {
@@ -51,13 +52,11 @@ public class Deck {
 	        deck.addLast(deck.remove(card));
 	    }
 	}
-	
 	/***
-	 * Draw as many number of cards from the deck.
-	 * The cards are then removed from the deck.
-	 * @param numOfCards representing how many cards are drawed.
+	 * Draw a number of cards from the deck as requested.
 	 * @return a LinkedList of cards.
 	 */
+	//This is an O(n) algorithm, where n is numOfCards.
 	public LinkedList<Card> draw(int numOfCards)
 	{
 		LinkedList<Card> cards = new LinkedList<Card>();

@@ -39,6 +39,11 @@ public class Card {
 	 */
 	public Card(String name, int id, ArrayList<Integer> points, Suit suit)
 	{
+		this(name, id, points, suit, false); //invokes the larger constructor
+	}
+	
+	public Card(String name, int id, ArrayList<Integer> points, Suit suit, boolean faceUp)
+	{
 		this.name = name;
 		this.id = id;
 		this.pointValue = points;
@@ -46,7 +51,7 @@ public class Card {
 		if ( suit == Suit.CLUB || suit == Suit.SPADE )
 			this.color = Color.BLACK;
 		else
-			this.color = Color.RED;
-		
+			this.color = Color.RED;	
+		this.faceUp = faceUp;
 	}
 }
