@@ -4,7 +4,6 @@ public class Table {
 	public static Dealer dealer;
 	public LinkedList<Player> players;
 	public static double pot;
-	public static LinkedList<LogEntry> log; //should be turned into a file
 	
 	public Table()
 	{
@@ -21,16 +20,17 @@ public class Table {
 		dealer = new Dealer(name, bank, deck);
 		this.players.add(dealer);
 		pot = 0;
-		log = new LinkedList<LogEntry>();
-		log.push(new LogEntry(
+		Game.log.push(new LogEntry(
 				LogEntry.Type.GAME_ACTION, 
-				"A new table has been formed with dealer " + dealer.name + "."));
+				"A new table has been formed run by dealer " + dealer.name + "."));
 	}
 	
 	public void newDealer(String name, double bank, Deck deck)
 	{
+		players.remove(dealer);
 		dealer = new Dealer(name, bank, deck);
-		log.push(new LogEntry(
+		players.add(dealer);
+		Game.log.push(new LogEntry(
 				LogEntry.Type.DEALER_ACTION,
 				"A new dealer " + name + " is running the table."));
 	}
@@ -38,7 +38,7 @@ public class Table {
 	public void playerJoinsTable(Player p)
 	{
 		players.add(p);
-		log.push(new LogEntry(
+		Game.log.push(new LogEntry(
 				LogEntry.Type.PLAYER_ACTION,
 				"A new player " + p.name + " joins the table."));
 	}
@@ -46,7 +46,7 @@ public class Table {
 	public void playerLeavesTable(Player p)
 	{
 		players.remove(p);
-		log.push(new LogEntry(
+		Game.log.push(new LogEntry(
 				LogEntry.Type.PLAYER_ACTION,
 				"Player " + p.name + " has left the table."));
 	}
