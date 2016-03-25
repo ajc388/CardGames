@@ -18,12 +18,16 @@ public class Dealer extends Player {
 	public void deal(int numOfCards, Player player) {
 		LinkedList<Card> cards = deck.draw(numOfCards);
 		player.hand.cards.addAll(cards);
-		Table.log += "Dealer gives " + player.name + " " + numOfCards + " cards.\n";
+		Table.log.push(new LogEntry(
+				LogEntry.Type.DEALER_ACTION,
+				"Dealer gives " + player.name + " " + numOfCards + " cards."));
 	}
 	
 	public void shuffle()
 	{
 		deck.shuffle();
-		Table.log += "Dealer shuffles the deck.\n";
+		Table.log.push(new LogEntry(
+				LogEntry.Type.DEALER_ACTION,
+				"Dealer shuffles the deck."));
 	}
 }
