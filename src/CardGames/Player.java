@@ -1,6 +1,8 @@
 package CardGames;
 import java.util.LinkedList;
 
+import javax.activity.InvalidActivityException;
+
 /**
  * @author sudoninja
  */
@@ -22,23 +24,27 @@ public class Player {
 	//					   GAMBLING ACTIONS
 	//===========================================================
 	/***
-	 * 
+	 * A player can place a bet on the table.
 	 * @param amount
 	 * @throws Exception
 	 */
 	public void bet(double amount) throws Exception
 	{
 		LogEntry e = Game.log.peek(); // grab last betting action
-		if ( e.amt != 0 )
-			throw new Exception("Invalid player action. Player cannot bet if there is an existing bet.");
+		if ( e == null )
+			throw new NullPointerException();
+		else if ( e.amt > 0 )
+			throw new InvalidActivityException("Player cannot use the bet method if there is an existing bet.");
+		else if (amount <= 0)
+			throw new IllegalArgumentException("Player cannot bet less than or equal to no money.");
 		else if ( amount > bank )
-			throw new Exception("Player does not have enough money to make the bet.");
+			throw new IllegalArgumentException("Player does not have enough money to make the bet.");
 		else 
 		{
 			bank -= amount;
 			Table.pot += amount;
 			Game.log.push(new LogEntry( 
-					LogEntry.Type.PLAYER_ACTION, 
+					LogEntry.Type.BET_ACTION, 
 					"Player " + name + " bets " + amount + ".",
 					amount));
 		}
@@ -53,38 +59,22 @@ public class Player {
 	public void raise(double amount) throws Exception
 	{
 		LogEntry e = Game.log.peek(); // grab last betting action
-		if ( amount > bank )
-			throw new Exception("Player does not have enough money to make the bet.");
-		else if ( e.amt == 0 )
-			throw new Exception("Invalid player action. No existing bet, try the bet action.");
+		if ( e == null )
+			throw new NullPointerException();
+		else if ( e.amt == 0 && e.logType == LogEntry.Type.BET_ACTION )
+			throw new InvalidActivityException("Player cannot use the raise method unless there is an existing bet.");
+		else if (amount <= 0)
+			throw new IllegalArgumentException("Player cannot raise less than or equal to no money.");
+		else if ( (amount+e.amt) > bank )
+			throw new IllegalArgumentException("Player does not have enough money to match and raise.");
 		else 
 		{
-			bank -= amount + e.amt;
-			Table.pot += amount;
+			bank -= amount;
+			Table.pot += amount + e.amt;
 			Game.log.push(new LogEntry(
-					LogEntry.Type.PLAYER_ACTION,
+					LogEntry.Type.BET_ACTION,
 					"Player " + name + " matches bet and raises " + amount + ".",
-					amount));
-		}
-	}
-	
-	/***
-	 * This player has collected a percentage of the pot.
-	 * If the player won everything enter 1.0.
-	 * @param winRatio a number less than 1.0 but greater than 0.0
-	 * @throws Exception 
-	 */
-	public void collect(double winRatio) throws Exception
-	{
-		if ( winRatio < 0.0 || winRatio > 1.0 )
-			throw new Exception("The win ratio must be between 0 and 1.0");
-		else
-		{
-			bank += Table.pot*winRatio;
-			Game.log.push(new LogEntry(
-					LogEntry.Type.PLAYER_ACTION,
-					"Player " + name + " won the pot for a total of " + Table.pot*winRatio + "."));
-			Table.pot -= Table.pot/winRatio;
+					amount + e.amt));
 		}
 	}
 	
@@ -97,17 +87,17 @@ public class Player {
 	 */
 	public void call() throws Exception
 	{
-		LogEntry log = Game.log.peek();
-		if ( log.amt == 0 )
-			throw new Exception("Invalid player action. Player can only call if there is an existing bet.");
-		else if ( log.amt > bank )
-			throw new Exception("Player does not have enough money to make the bet.");
+		LogEntry log = Game.log.peek(); // grab last betting action
+		if ( log == null )
+			throw new NullPointerException();
+		else if ( log.amt == 0 && log.logType == LogEntry.Type.BET_ACTION )
+			throw new InvalidActivityException("Player cannot use the call method unless there is an existing bet.");
 		else 
 		{
 			bank -= log.amt;
 			Table.pot += log.amt;
 			Game.log.push(new LogEntry(
-					LogEntry.Type.PLAYER_ACTION,
+					LogEntry.Type.BET_ACTION,
 					"Player " + name + " matches the bet for " + log.amt + ".",
 					log.amt));
 		}
@@ -135,6 +125,26 @@ public class Player {
 		Game.log.push(new LogEntry(
 				LogEntry.Type.PLAYER_ACTION,
 				"Player " + name + " opts out for the round."));
+	}
+	
+	/***
+	 * This player has collected a percentage of the pot.
+	 * If the player won everything enter 1.0.
+	 * @param winRatio a number less than 1.0 but greater than 0.0
+	 * @throws Exception 
+	 */
+	public void collect(double winRatio) throws Exception
+	{
+		if ( winRatio < 0.0 || winRatio > 1.0 )
+			throw new Exception("The win ratio must be between 0 and 1.0");
+		else
+		{
+			bank += Table.pot*winRatio;
+			Game.log.push(new LogEntry(
+					LogEntry.Type.PLAYER_ACTION,
+					"Player " + name + " won the pot for a total of " + Table.pot*winRatio + "."));
+			Table.pot -= Table.pot/winRatio;
+		}
 	}
 	
 	/**

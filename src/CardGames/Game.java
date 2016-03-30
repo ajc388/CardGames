@@ -11,7 +11,7 @@ public abstract class Game {
 
 	/* TODO: Make sure you construct the table in the correct way.
 	 * The table will automatically build the dealer. It will not
-	 * assign players automatically. */
+	 * assign players. */
 	public Game()
 	{
 		table = new Table();
@@ -23,7 +23,7 @@ public abstract class Game {
 	/* TODO:
 	 * This phase should encapsulate the setup of the game.
 	 * During the first round the players should join
-	 * the table and pay an anti (if applicable) 
+	 * the table and pay an ante (if applicable) 
 	 * the dealer should then deal an appropriate amount of cards 
 	 * to the players hands. */
 	public abstract void setup(LinkedList<Player> players);

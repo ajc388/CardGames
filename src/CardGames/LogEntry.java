@@ -22,6 +22,6 @@ public class LogEntry
 	}
 	
 	public static enum Type {
-		PLAYER_ACTION, DEALER_ACTION, GAME_ACTION
+		PLAYER_ACTION, BET_ACTION, DEALER_ACTION, GAME_ACTION, RAISE_ACTION
 	}
 }
