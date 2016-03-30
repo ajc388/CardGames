@@ -1,13 +1,13 @@
+package CardGames;
 import java.util.LinkedList;
 
 /**
  * @author sudoninja
- *
  */
 public class Player {
 	public String name;
 	private double bank;
-	protected Hand hand;
+	public Hand hand;
 	public boolean inPlay;
 	
 	public Player(String name, double bank)
@@ -18,7 +18,9 @@ public class Player {
 		this.inPlay = true;
 	}
 	
-	//Gambling Actions
+	//===========================================================
+	//					   GAMBLING ACTIONS
+	//===========================================================
 	public void bet(double amount)
 	{
 		bank -= amount;
@@ -78,8 +80,17 @@ public class Player {
 				"Player " + name + " opts out for the round."));
 	}
 	
-	//Actions on Hand
-	public void Draw(int numOfCards)
+	public void check()
+	{
+		Game.log.push(new LogEntry(
+				LogEntry.Type.PLAYER_ACTION,
+				"Player " + name + " checks."));
+	}
+	
+	//=============================================================
+	//                       Player Actions
+	//=============================================================
+	public void Draw(int numOfCards) throws Exception
 	{
 		Game.log.push(new LogEntry(
 				LogEntry.Type.PLAYER_ACTION,
@@ -110,12 +121,5 @@ public class Player {
 		Game.log.push(new LogEntry(
 				LogEntry.Type.PLAYER_ACTION,
 				"Player " + name + " has folded."));
-	}
-	
-	public void check()
-	{
-		Game.log.push(new LogEntry(
-				LogEntry.Type.PLAYER_ACTION,
-				"Player " + name + " checks."));
 	}
 }

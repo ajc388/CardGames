@@ -1,17 +1,15 @@
+package CardGames;
 import java.util.ArrayList;
 
 /***
  * A class that stores all data related to a casino playing card.
  * @author sudoninja
- *
  */
 public class Card {
 	
 	public String name;
-	public int id;
 	public Suit suit;
 	public Color color;
-	public ArrayList<Integer> pointValue;
 	public boolean faceUp;	
 	
 	/***
@@ -31,27 +29,37 @@ public class Card {
 	}
 	
 	/***
-	 * 
-	 * @param name should be a string literal like: "Ace", "Queen", "Jack", "One", etc...
-	 * @param id should be a value 1-13 representing a unique ID of the card.
-	 * @param points a point value used for the calculation of a winning hand.
+	 * The most basic card constructor.
+	 * @param name is the name of the card: "Ace", "Queen", "Jack", "One", etc...
 	 * @param suit any enumeration of suit.
 	 */
-	public Card(String name, int id, ArrayList<Integer> points, Suit suit)
+	public Card(String name, Suit suit)
 	{
-		this(name, id, points, suit, false); //invokes the larger constructor
+		this(name, suit, false); //invokes the larger constructor
 	}
 	
-	public Card(String name, int id, ArrayList<Integer> points, Suit suit, boolean faceUp)
+	/***
+	 * A card constructor that includes faceUp.
+	 * @param name is the name of the card: "Ace", "Queen", "Jack", "One", etc...
+	 * @param suit is either a club, spade, diamond, or heart.
+	 * @param faceUp makes the card visible to other players.
+	 */
+	public Card(String name, Suit suit, boolean faceUp)
 	{
 		this.name = name;
-		this.id = id;
-		this.pointValue = points;
 		this.suit = suit;
 		if ( suit == Suit.CLUB || suit == Suit.SPADE )
 			this.color = Color.BLACK;
 		else
 			this.color = Color.RED;	
 		this.faceUp = faceUp;
+	}
+	
+	/***
+	 * Will flip the visibility of the card.
+	 */
+	public void flipCard()
+	{
+		faceUp = (faceUp ? false: true);
 	}
 }

@@ -1,3 +1,4 @@
+package CardGames;
 import java.util.Date;
 
 public class LogEntry 

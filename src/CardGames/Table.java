@@ -1,8 +1,9 @@
+package CardGames;
 import java.util.LinkedList;
 
 public class Table {
 	public static Dealer dealer;
-	public LinkedList<Player> players;
+	public LinkedList<Player> players; //should include the dealer
 	public static double pot;
 	
 	public Table()
@@ -19,7 +20,7 @@ public class Table {
 	{
 		dealer = new Dealer(name, bank, deck);
 		this.players.add(dealer);
-		pot = 0;
+		this.pot = 0;
 		Game.log.push(new LogEntry(
 				LogEntry.Type.GAME_ACTION, 
 				"A new table has been formed run by dealer " + dealer.name + "."));
