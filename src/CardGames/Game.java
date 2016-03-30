@@ -6,6 +6,7 @@ import java.util.LinkedList;
  * @author sudoninja (aka ajc388)
  */
 public abstract class Game {
+	private Table table;
 	public static LinkedList<LogEntry> log; //should be turned into a file
 
 	/* TODO: Make sure you construct the table in the correct way.
