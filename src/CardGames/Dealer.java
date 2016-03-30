@@ -1,8 +1,6 @@
 package CardGames;
 import java.util.LinkedList;
 
-import CardGames.LogEntry.Type;
-
 public class Dealer extends Player {
 
 	public Deck deck;

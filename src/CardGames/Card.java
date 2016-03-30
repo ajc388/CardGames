@@ -1,8 +1,7 @@
 package CardGames;
-import java.util.ArrayList;
 
 /***
- * A class that stores all data related to a casino playing card.
+ * A class that stores all data related to a Casino playing card.
  * @author sudoninja
  */
 public class Card {

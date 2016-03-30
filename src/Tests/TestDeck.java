@@ -6,9 +6,6 @@ package Tests;
 import CardGames.Card;
 import CardGames.Deck;
 import static org.junit.Assert.*;
-
-import java.util.LinkedList;
-
 import org.junit.Test;
 
 /**
