@@ -12,6 +12,7 @@ import CardGames.Card;
 import CardGames.Dealer;
 import CardGames.Deck;
 import CardGames.Game;
+import CardGames.GameLog;
 import CardGames.LogEntry;
 
 public class TestDealer {
@@ -21,13 +22,12 @@ public class TestDealer {
 	@Before
 	public void setUp() throws Exception {
 		dealer = new Dealer("MasterChief", 9000);
-		Game.log = new LinkedList<LogEntry>();
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		dealer = null;
-		Game.log = null;
+		GameLog.delete();
 	}
 	
 	@Test 
@@ -62,19 +62,19 @@ public class TestDealer {
 	{
 		dealer.deck = new Deck();
 		dealer.deal(0, dealer);
-		assertEquals(0, dealer.hand.cards.size());
+		assertEquals(0, dealer.cards.size());
 		
 		dealer.deal(1, dealer);
-		assertEquals(2, dealer.hand.cards.size());
+		assertEquals(2, dealer.cards.size());
 		assertEquals(51, dealer.deck.cards.size());
 		
 		dealer.deal(5, dealer);
-		assertEquals(7, dealer.hand.cards.size());
-		assertEquals(46, dealer.hand.cards.size());
+		assertEquals(7, dealer.cards.size());
+		assertEquals(46, dealer.cards.size());
 		
 		//What happens if you draw too many cards... ?
 		dealer.deal(47, dealer);
-		assertEquals(6, dealer.hand.cards.size());
+		assertEquals(6, dealer.cards.size());
 		
 		dealer.deck = null;
 	}

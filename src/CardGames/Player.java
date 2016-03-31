@@ -10,15 +10,15 @@ import CardGames.LogEntry.Type;
  */
 public class Player {
 	public String name;
-	private double bank;
-	public Hand hand;
+	public double bank;
+	public LinkedList<Card> cards;
 	public boolean inPlay;
 	
 	public Player(String name, double bank)
 	{
 		this.name = name;
 		this.bank = bank;
-		this.hand = new Hand();
+		this.cards = new LinkedList<Card>();
 		this.inPlay = false;
 	}
 	
@@ -32,8 +32,10 @@ public class Player {
 	 */
 	public void bet(double amount) throws Exception
 	{
-		LogEntry e = Game.log.peek(); // grab last betting action
-		if ( e == null )
+		LogEntry e = GameLog.peek(); // grab last betting action
+		if (!inPlay)
+			throw new InvalidActivityException("Player is not in play.");
+		else if ( e == null )
 			throw new NullPointerException();
 		else if ( e.logType == Type.BET_ACTION )
 			throw new InvalidActivityException("Player cannot use the bet method if there is an existing bet.");
@@ -45,10 +47,10 @@ public class Player {
 		{
 			bank -= amount;
 			Table.pot += amount;
-			Game.log.push(new LogEntry( 
+			GameLog.add(
 					LogEntry.Type.BET_ACTION, 
 					"Player " + name + " bets " + amount + ".",
-					amount));
+					amount);
 		}
 	}
 	
@@ -60,8 +62,10 @@ public class Player {
 	 */
 	public void raise(double amount) throws Exception
 	{
-		LogEntry e = Game.log.peek(); // grab last betting action
-		if ( e == null )
+		LogEntry e = GameLog.peek(); // grab last betting action
+		if (!inPlay)
+			throw new InvalidActivityException("Player is not in play.");
+		else if ( e == null )
 			throw new NullPointerException();
 		else if ( e.logType != LogEntry.Type.BET_ACTION )
 			throw new InvalidActivityException("Player can only raise after a bet action.");
@@ -73,10 +77,10 @@ public class Player {
 		{
 			bank -= amount;
 			Table.pot += amount + e.amt;
-			Game.log.push(new LogEntry(
+			GameLog.add(
 					LogEntry.Type.BET_ACTION,
 					"Player " + name + " matches bet and raises " + amount + ".",
-					amount + e.amt));
+					amount + e.amt);
 		}
 	}
 	
@@ -89,8 +93,10 @@ public class Player {
 	 */
 	public void call() throws Exception
 	{
-		LogEntry log = Game.log.peek(); // grab last betting action
-		if ( log == null )
+		LogEntry log = GameLog.peek(); // grab last betting action
+		if (!inPlay)
+			throw new InvalidActivityException("Player is not in play.");
+		else if ( log == null )
 			throw new NullPointerException();
 		else if ( log.logType != LogEntry.Type.BET_ACTION )
 			throw new InvalidActivityException("Player can only call after a bet action.");
@@ -98,10 +104,10 @@ public class Player {
 		{
 			bank -= log.amt;
 			Table.pot += log.amt;
-			Game.log.push(new LogEntry(
+			GameLog.add(
 					LogEntry.Type.BET_ACTION,
 					"Player " + name + " matches the bet for " + log.amt + ".",
-					log.amt));
+					log.amt);
 		}
 	}
 	
@@ -112,14 +118,16 @@ public class Player {
 	 */
 	public void check() throws Exception
 	{
-		LogEntry e = Game.log.peek();
-		if ( e.amt <= 0 && e.logType == LogEntry.Type.BET_ACTION)
+		LogEntry e = GameLog.peek();
+		if (!inPlay)
+			throw new InvalidActivityException("Player is not in play.");
+		else if ( e.amt <= 0 && e.logType == LogEntry.Type.BET_ACTION)
 			throw new InvalidActivityException("A player cannot check if there is a bet on the table.");
 		else 
 		{
-			Game.log.push(new LogEntry(
+			GameLog.add(
 					LogEntry.Type.BET_ACTION,
-					"Player " + name + " checks."));
+					"Player " + name + " checks.");
 		}
 	}
 	
@@ -130,7 +138,7 @@ public class Player {
 	 */
 	public void optIn() throws Exception
 	{
-		LogEntry e = Game.log.peek();
+		LogEntry e = GameLog.peek();
 		if ( e.logType != LogEntry.Type.GAME_START )
 			throw new InvalidActivityException("Player cannot buy in unless it's the start of a new round.");
 		else 
@@ -138,10 +146,10 @@ public class Player {
 			inPlay = true;
 			bank -= Table.getAnte(); //this could be negative... need to fix that in table
 			Table.pot += Table.getAnte();
-			Game.log.push(new LogEntry(
+			GameLog.add(
 					LogEntry.Type.GAME_START,
 					"Player " + name + " buys in for the round " + Table.getAnte() + ".",
-					Table.getAnte()));
+					Table.getAnte());
 		}
 	}
 	
@@ -152,15 +160,15 @@ public class Player {
 	 */
 	public void optOut() throws Exception
 	{
-		LogEntry e = Game.log.peek();
+		LogEntry e = GameLog.peek();
 		if ( e.logType != LogEntry.Type.GAME_START )
 			throw new InvalidActivityException("Player cannot opt out of th eround unless it's the start of a new round.");
 		else
 		{
 			inPlay = false;
-			Game.log.push(new LogEntry(
+			GameLog.add(
 					LogEntry.Type.GAME_START,
-					"Player " + name + " opts out for the round."));
+					"Player " + name + " opts out for the round.");
 		}
 	}
 	
@@ -172,15 +180,17 @@ public class Player {
 	 */
 	public void collect(double winRatio) throws Exception
 	{
-		if ( winRatio < 0.0 || winRatio > 1.0 )
+		if (!inPlay)
+			throw new InvalidActivityException("Player must be inPlay.");
+		if ( winRatio <= 0.0 || winRatio > 1.0 )
 			throw new IllegalArgumentException("The win ratio must be between 0 and 1.");
 		else
 		{
 			bank += Table.pot*winRatio;
-			Table.pot -= Table.pot/winRatio;
-			Game.log.push(new LogEntry(
+			Table.pot -= Table.pot*winRatio;
+			GameLog.add(
 					LogEntry.Type.PLAYER_ACTION,
-					"Player " + name + " won the pot for a total of " + Table.pot*winRatio + "."));
+					"Player " + name + " won the pot for a total of " + Table.pot*winRatio + ".");
 		}
 	}
 	
@@ -195,22 +205,27 @@ public class Player {
 	 */
 	public void RequestDraw(int numOfCards) throws Exception
 	{
+		if (!inPlay)
+			throw new InvalidActivityException("Player is not in play.");
+		
 		Table.dealer.deal(numOfCards, this); 
-		Game.log.push(new LogEntry(
+		GameLog.add(
 				LogEntry.Type.PLAYER_ACTION,
-				"Player " + name + " requests " + numOfCards +"."));
+				"Player " + name + " requests " + numOfCards +".");
 	}
 	
 	/***
 	 * Discard a specific card from your hand.
 	 * @param card to be discarded.
 	 */
-	public void Discard(Card card)
+	public void Discard(Card card) throws Exception
 	{
-		hand.cards.remove(card);
-		Game.log.push(new LogEntry(
+		if (!inPlay)
+			throw new InvalidActivityException("Player is not in play.");
+		cards.remove(card);
+		GameLog.add(
 				LogEntry.Type.PLAYER_ACTION,
-				"Player " + name + " discards a card."));
+				"Player " + name + " discards a card.");
 	}
 	
 	/***
@@ -220,10 +235,10 @@ public class Player {
 	 */
 	public void Fold()
 	{
-		hand.cards = null;
+		cards = null;
 		inPlay = false;
-		Game.log.push(new LogEntry(
+		GameLog.add(
 				LogEntry.Type.PLAYER_ACTION,
-				"Player " + name + " has folded."));
+				"Player " + name + " has folded.");
 	}
 }

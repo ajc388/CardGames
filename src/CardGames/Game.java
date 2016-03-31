@@ -7,8 +7,7 @@ import java.util.LinkedList;
  */
 public abstract class Game {
 	private Table table;
-	public static LinkedList<LogEntry> log; //should be turned into a file
-
+	
 	/* TODO: Make sure you construct the table in the correct way.
 	 * The table will automatically build the dealer. It will not
 	 * assign players. */
@@ -43,21 +42,4 @@ public abstract class Game {
 	 * This depends entirely on the game. */
 	public abstract void evaluateHand();
 	
-	/***
-	 * Print the whole log from the most recent to the oldest entry.
-	 */
-	private void printLog()
-	{
-		for ( LogEntry logEntry : log)
-			System.out.println( logEntry.date.toString() + " - " + logEntry.log );
-	}
-	
-	/***
-	 * Print the most recent action to the console.
-	 */
-	private void printRecentLog()
-	{
-		LogEntry recent = log.peek();
-		System.out.println( recent.date.toString() + " - " + recent.log);
-	}
 }

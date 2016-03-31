@@ -32,11 +32,11 @@ public class Dealer extends Player {
 			for ( int n = 0; n < numOfCards; n++ )
 				cards.add(cards.pop());
 			
-		player.hand.cards.addAll(cards);
+		player.cards.addAll(cards);
 		
-		Game.log.push(new LogEntry(
-				LogEntry.Type.DEALER_ACTION,
-				"Dealer gives " + player.name + " " + numOfCards + " cards."));
+		GameLog.add(
+			LogEntry.Type.DEALER_ACTION,
+			"Dealer gives " + player.name + " " + numOfCards + " cards.");
 	}
 	
 	/***
@@ -52,9 +52,9 @@ public class Dealer extends Player {
 	        deck.cards.addLast(deck.cards.remove(card));
 	    }
 		
-		Game.log.push(new LogEntry(
-				LogEntry.Type.DEALER_ACTION,
-				"Dealer shuffles the deck."));
+		GameLog.add(
+			LogEntry.Type.DEALER_ACTION,
+			"Dealer shuffles the deck.");
 	}
 	
 }

@@ -7,6 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import CardGames.Game;
+import CardGames.GameLog;
 import CardGames.LogEntry;
 import CardGames.Player;
 import CardGames.Table;
@@ -18,7 +19,7 @@ public class TestPlayer {
 	@Before
 	public void setUp() throws Exception {
 		p = new Player("p1", 100);
-		Game.log = new LinkedList<LogEntry>();
+		p.inPlay = true;
 		table = new Table();
 	}
 
@@ -26,8 +27,8 @@ public class TestPlayer {
 	public void tearDown() throws Exception {
 		p = null;
 		table = null;
-		Game.log = null;
 		Table.pot = 0;
+		GameLog.delete();
 	}
 
 	//=========================================================
@@ -71,7 +72,7 @@ public class TestPlayer {
 		p.bet(bet);
 		assertEquals(bet, Table.pot, 0.01);
 			
-		LogEntry e = Game.log.pop();
+		LogEntry e = GameLog.pop();
 		assertNotNull(e.date);
 		assertEquals(LogEntry.Type.BET_ACTION, e.logType);
 		assertEquals(bet, e.amt, 0.01); //ensure no bet was logged		
@@ -118,7 +119,7 @@ public class TestPlayer {
 		p.raise(raise);
 		assertEquals(raise+40.0, table.pot, 0.01);
 			
-		LogEntry e = Game.log.pop();
+		LogEntry e = GameLog.pop();
 		assertNotNull(e.date);
 		assertEquals(LogEntry.Type.BET_ACTION, e.logType);
 		assertEquals(raise+20.0, e.amt, 0.01); //ensure no bet was logged
@@ -135,7 +136,7 @@ public class TestPlayer {
 		p.call();
 		assertEquals(40.0, table.pot, 0.0);
 		
-		LogEntry e = Game.log.peek();
+		LogEntry e = GameLog.peek();
 		assertNotNull(e.date);
 		assertEquals(LogEntry.Type.BET_ACTION, e.logType);
 		assertEquals(20.0, e.amt, 0.01);
@@ -151,7 +152,7 @@ public class TestPlayer {
 		p.call();
 		assertEquals(100.0, table.pot, 0.01);
 		
-		LogEntry e = Game.log.peek();
+		LogEntry e = GameLog.peek();
 		assertNotNull(e.date);
 		assertEquals(LogEntry.Type.BET_ACTION, e.logType);
 		assertEquals(40.0, e.amt, 0.01);
@@ -169,7 +170,7 @@ public class TestPlayer {
 	@Test(expected = InvalidActivityException.class)
 	public void testCheckNoBet() throws Exception
 	{
-		Game.log.push(new LogEntry(LogEntry.Type.BET_ACTION, "Test"));
+		GameLog.add(LogEntry.Type.BET_ACTION, "Test");
 		p.check();
 	}
 	
@@ -181,7 +182,7 @@ public class TestPlayer {
 		p.check();
 		assertEquals(10, table.pot, 0.01);
 		
-		LogEntry e = Game.log.peek();
+		LogEntry e = GameLog.peek();
 		assertNotNull(e.date);
 		assertEquals(LogEntry.Type.BET_ACTION, e.logType);
 		assertEquals(0.0, e.amt, 0.01);
@@ -193,7 +194,7 @@ public class TestPlayer {
 	@Test
 	public void testOptInCorrectPhase() throws Exception 
 	{
-		Game.log.push(new LogEntry(LogEntry.Type.GAME_START, "Initialized for test."));
+		GameLog.add(LogEntry.Type.GAME_START, "Initialized for test.");
 		table.setAnte(5.0);
 		p.inPlay = false;
 		assertFalse(p.inPlay);
@@ -202,7 +203,7 @@ public class TestPlayer {
 		assertEquals(5.0, table.pot, 0.01);
 		assertTrue(p.inPlay);
 		
-		LogEntry e = Game.log.peek();
+		LogEntry e = GameLog.peek();
 		assertNotNull(e.date);
 		assertEquals(LogEntry.Type.GAME_START, e.logType);
 		assertEquals(5, e.amt, 0.01);
@@ -216,15 +217,47 @@ public class TestPlayer {
 	
 	public void testOptOut() throws Exception
 	{
-		Game.log.push(new LogEntry(LogEntry.Type.GAME_START, "Initialized for test."));
+		GameLog.add(LogEntry.Type.GAME_START, "Initialized for test.");
 		p.inPlay = true;
 		assertTrue(p.inPlay);
 		
 		p.optOut();
 		assertFalse(p.inPlay);
 		
-		LogEntry e = Game.log.peek();
+		LogEntry e = GameLog.peek();
 		assertNotNull(e.date);
 		assertEquals(LogEntry.Type.GAME_START, e.logType);
 	}
+	
+	//==============================================
+	//				TEST COLLECT
+	//==============================================
+	@Test(expected = IllegalArgumentException.class)
+	public void testRatioTooLow() throws Exception
+	{
+		testWinRatio(0.0);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testRatioTooMuch() throws Exception
+	{
+		testWinRatio(1.01);
+	}
+	
+	@Test
+	public void testRatioAll() throws Exception
+	{
+		testWinRatio(1.0);
+	}
+	
+	private void testWinRatio(double ratio) throws Exception
+	{
+		int initialPot = 100;
+		Table.pot = initialPot;
+		
+		p.collect(ratio);
+		assertEquals(initialPot*ratio+100 , p.bank, 0.01);
+		assertEquals(initialPot - initialPot*ratio , Table.pot, 0.01);
+	}
+	
 }

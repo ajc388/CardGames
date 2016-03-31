@@ -26,9 +26,9 @@ public class Table {
 		this.players.add(dealer);
 		Table.pot = 0;
 		setAnte(ante);
-		Game.log.push(new LogEntry(
-				LogEntry.Type.GAME_ACTION, 
-				"A new table has been formed run by dealer " + dealer.name + "."));
+		GameLog.add(
+			LogEntry.Type.GAME_ACTION, 
+			"A new table has been formed run by dealer " + dealer.name + ".");
 	}
 	
 	public void newDealer(String name, double bank, Deck deck)
@@ -36,25 +36,25 @@ public class Table {
 		players.remove(dealer);
 		dealer = new Dealer(name, bank, deck);
 		players.add(dealer);
-		Game.log.push(new LogEntry(
-				LogEntry.Type.GAME_ACTION,
-				"A new dealer " + name + " is running the table."));
+		GameLog.add(
+			LogEntry.Type.GAME_ACTION,
+			"A new dealer " + name + " is running the table.");
 	}
 	
 	public void playerJoinsTable(Player p)
 	{
 		players.add(p);
-		Game.log.push(new LogEntry(
+		GameLog.add(
 				LogEntry.Type.GAME_ACTION,
-				"A new player " + p.name + " joins the table."));
+				"A new player " + p.name + " joins the table.");
 	}
 	
 	public void playerLeavesTable(Player p)
 	{
 		players.remove(p);
-		Game.log.push(new LogEntry(
+		GameLog.add(
 				LogEntry.Type.GAME_ACTION,
-				"Player " + p.name + " has left the table."));
+				"Player " + p.name + " has left the table.");
 	}
 	
 	public static void setAnte(double newAnte)
