@@ -13,22 +13,21 @@ import CardGames.Table;
 
 public class TestPlayer {
 	private Player p;
-		
+	private Table table;
+	
 	@Before
 	public void setUp() throws Exception {
 		p = new Player("p1", 100);
-		Table.pot = 0;
 		Game.log = new LinkedList<LogEntry>();
-		Game.log.push(new LogEntry(
-				LogEntry.Type.GAME_ACTION,
-				"Player test has been initialized"));
+		table = new Table();
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		p = null;
-		Table.pot = 0;
+		table = null;
 		Game.log = null;
+		Table.pot = 0;
 	}
 
 	//=========================================================
@@ -114,10 +113,10 @@ public class TestPlayer {
 	private void testRaise(double raise) throws Exception
 	{
 		p.bet(20); //adds a bet
-		assertEquals(20.0, Table.pot, 0.01);
+		assertEquals(20.0, table.pot, 0.01);
 		
 		p.raise(raise);
-		assertEquals(raise+40.0, Table.pot, 0.01);
+		assertEquals(raise+40.0, table.pot, 0.01);
 			
 		LogEntry e = Game.log.pop();
 		assertNotNull(e.date);
@@ -128,5 +127,104 @@ public class TestPlayer {
 	//===================================================
 	//		          TEST CALL METHOD
 	//===================================================
-
+	@Test
+	public void testCallOnBet() throws Exception
+	{
+		p.bet(20);
+		assertEquals(20.0 , table.pot, 0.0);
+		p.call();
+		assertEquals(40.0, table.pot, 0.0);
+		
+		LogEntry e = Game.log.peek();
+		assertNotNull(e.date);
+		assertEquals(LogEntry.Type.BET_ACTION, e.logType);
+		assertEquals(20.0, e.amt, 0.01);
+	}
+	
+	@Test
+	public void testCallOnRaise() throws Exception
+	{
+		p.bet(20);
+		assertEquals(20.0 , table.pot, 0.01);
+		p.raise(20);
+		assertEquals(60.0, table.pot, 0.01);
+		p.call();
+		assertEquals(100.0, table.pot, 0.01);
+		
+		LogEntry e = Game.log.peek();
+		assertNotNull(e.date);
+		assertEquals(LogEntry.Type.BET_ACTION, e.logType);
+		assertEquals(40.0, e.amt, 0.01);
+	}
+	
+	@Test(expected = InvalidActivityException.class)
+	public void testCallNoAction() throws Exception
+	{
+		p.call();
+	}
+	
+	//==============================================
+	//				TEST CHECK METHOD
+	//==============================================
+	@Test(expected = InvalidActivityException.class)
+	public void testCheckNoBet() throws Exception
+	{
+		Game.log.push(new LogEntry(LogEntry.Type.BET_ACTION, "Test"));
+		p.check();
+	}
+	
+	@Test
+	public void testCheck() throws Exception
+	{
+		p.bet(10);
+		assertEquals(10, table.pot, 0.01);
+		p.check();
+		assertEquals(10, table.pot, 0.01);
+		
+		LogEntry e = Game.log.peek();
+		assertNotNull(e.date);
+		assertEquals(LogEntry.Type.BET_ACTION, e.logType);
+		assertEquals(0.0, e.amt, 0.01);
+	}
+	
+	//==============================================
+	//				OPT IN AND OPT OUT
+	//==============================================
+	@Test
+	public void testOptInCorrectPhase() throws Exception 
+	{
+		Game.log.push(new LogEntry(LogEntry.Type.GAME_START, "Initialized for test."));
+		table.setAnte(5.0);
+		p.inPlay = false;
+		assertFalse(p.inPlay);
+		
+		p.optIn();
+		assertEquals(5.0, table.pot, 0.01);
+		assertTrue(p.inPlay);
+		
+		LogEntry e = Game.log.peek();
+		assertNotNull(e.date);
+		assertEquals(LogEntry.Type.GAME_START, e.logType);
+		assertEquals(5, e.amt, 0.01);
+	}
+	
+	@Test(expected = InvalidActivityException.class)
+	public void testOptInNotGameStart() throws Exception
+	{
+		p.optIn();
+	}
+	
+	public void testOptOut() throws Exception
+	{
+		Game.log.push(new LogEntry(LogEntry.Type.GAME_START, "Initialized for test."));
+		p.inPlay = true;
+		assertTrue(p.inPlay);
+		
+		p.optOut();
+		assertFalse(p.inPlay);
+		
+		LogEntry e = Game.log.peek();
+		assertNotNull(e.date);
+		assertEquals(LogEntry.Type.GAME_START, e.logType);
+	}
 }

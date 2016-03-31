@@ -3,6 +3,8 @@ import java.util.LinkedList;
 
 import javax.activity.InvalidActivityException;
 
+import CardGames.LogEntry.Type;
+
 /**
  * @author sudoninja
  */
@@ -33,7 +35,7 @@ public class Player {
 		LogEntry e = Game.log.peek(); // grab last betting action
 		if ( e == null )
 			throw new NullPointerException();
-		else if ( e.amt > 0 )
+		else if ( e.logType == Type.BET_ACTION )
 			throw new InvalidActivityException("Player cannot use the bet method if there is an existing bet.");
 		else if (amount <= 0)
 			throw new IllegalArgumentException("Player cannot bet less than or equal to no money.");
@@ -61,8 +63,8 @@ public class Player {
 		LogEntry e = Game.log.peek(); // grab last betting action
 		if ( e == null )
 			throw new NullPointerException();
-		else if ( e.amt == 0 && e.logType == LogEntry.Type.BET_ACTION )
-			throw new InvalidActivityException("Player cannot use the raise method unless there is an existing bet.");
+		else if ( e.logType != LogEntry.Type.BET_ACTION )
+			throw new InvalidActivityException("Player can only raise after a bet action.");
 		else if (amount <= 0)
 			throw new IllegalArgumentException("Player cannot raise less than or equal to no money.");
 		else if ( (amount+e.amt) > bank )
@@ -90,8 +92,8 @@ public class Player {
 		LogEntry log = Game.log.peek(); // grab last betting action
 		if ( log == null )
 			throw new NullPointerException();
-		else if ( log.amt == 0 && log.logType == LogEntry.Type.BET_ACTION )
-			throw new InvalidActivityException("Player cannot use the call method unless there is an existing bet.");
+		else if ( log.logType != LogEntry.Type.BET_ACTION )
+			throw new InvalidActivityException("Player can only call after a bet action.");
 		else 
 		{
 			bank -= log.amt;
@@ -103,65 +105,85 @@ public class Player {
 		}
 	}
 	
-	/***
-	 * The required ante to play for the round.
-	 * This amount is set by the table.
-	 * @param amount of buyIn
-	 */
-	public void buyIn()
-	{
-		inPlay = true;
-		bank -= Table.ante;
-		Table.pot += Table.ante;
-		Game.log.push(new LogEntry(
-				LogEntry.Type.PLAYER_ACTION,
-				"Player " + name + " buys in for the round " + Table.ante + ".",
-				Table.ante));
-	}
-	
-	public void optOut()
-	{
-		inPlay = false;
-		Game.log.push(new LogEntry(
-				LogEntry.Type.PLAYER_ACTION,
-				"Player " + name + " opts out for the round."));
-	}
-	
-	/***
-	 * This player has collected a percentage of the pot.
-	 * If the player won everything enter 1.0.
-	 * @param winRatio a number less than 1.0 but greater than 0.0
-	 * @throws Exception 
-	 */
-	public void collect(double winRatio) throws Exception
-	{
-		if ( winRatio < 0.0 || winRatio > 1.0 )
-			throw new Exception("The win ratio must be between 0 and 1.0");
-		else
-		{
-			bank += Table.pot*winRatio;
-			Game.log.push(new LogEntry(
-					LogEntry.Type.PLAYER_ACTION,
-					"Player " + name + " won the pot for a total of " + Table.pot*winRatio + "."));
-			Table.pot -= Table.pot/winRatio;
-		}
-	}
-	
 	/**
+	 * A played can decide not to add anything to the pot using
+	 * the check action.
 	 * @throws Exception throws exception if there is a bet on the table.
 	 */
 	public void check() throws Exception
 	{
 		LogEntry e = Game.log.peek();
-		if ( e.amt > 0 )
-			throw new Exception("Invalid player action. A player cannot check if there is a bet on the table.");
+		if ( e.amt <= 0 && e.logType == LogEntry.Type.BET_ACTION)
+			throw new InvalidActivityException("A player cannot check if there is a bet on the table.");
 		else 
 		{
 			Game.log.push(new LogEntry(
-					LogEntry.Type.PLAYER_ACTION,
+					LogEntry.Type.BET_ACTION,
 					"Player " + name + " checks."));
 		}
 	}
+	
+	/***
+	 * Player pays the required ante for the round.
+	 * This amount is set by the table.
+	 * @throws Exception 
+	 */
+	public void optIn() throws Exception
+	{
+		LogEntry e = Game.log.peek();
+		if ( e.logType != LogEntry.Type.GAME_START )
+			throw new InvalidActivityException("Player cannot buy in unless it's the start of a new round.");
+		else 
+		{
+			inPlay = true;
+			bank -= Table.getAnte(); //this could be negative... need to fix that in table
+			Table.pot += Table.getAnte();
+			Game.log.push(new LogEntry(
+					LogEntry.Type.GAME_START,
+					"Player " + name + " buys in for the round " + Table.getAnte() + ".",
+					Table.getAnte()));
+		}
+	}
+	
+	/***
+	 * A player can choose not to pay the ante 
+	 * and opt out of the round.
+	 * @throws Exception
+	 */
+	public void optOut() throws Exception
+	{
+		LogEntry e = Game.log.peek();
+		if ( e.logType != LogEntry.Type.GAME_START )
+			throw new InvalidActivityException("Player cannot opt out of th eround unless it's the start of a new round.");
+		else
+		{
+			inPlay = false;
+			Game.log.push(new LogEntry(
+					LogEntry.Type.GAME_START,
+					"Player " + name + " opts out for the round."));
+		}
+	}
+	
+	/***
+	 * This player has collected a percentage of the pot.
+	 * If the player won everything enter 1.0.
+	 * @param winRatio a number greater than 0.0 and less than 1.0
+	 * @throws Exception 
+	 */
+	public void collect(double winRatio) throws Exception
+	{
+		if ( winRatio < 0.0 || winRatio > 1.0 )
+			throw new IllegalArgumentException("The win ratio must be between 0 and 1.");
+		else
+		{
+			bank += Table.pot*winRatio;
+			Table.pot -= Table.pot/winRatio;
+			Game.log.push(new LogEntry(
+					LogEntry.Type.PLAYER_ACTION,
+					"Player " + name + " won the pot for a total of " + Table.pot*winRatio + "."));
+		}
+	}
+	
 	
 	//=============================================================
 	//                       Player Actions
@@ -189,18 +211,6 @@ public class Player {
 		Game.log.push(new LogEntry(
 				LogEntry.Type.PLAYER_ACTION,
 				"Player " + name + " discards a card."));
-	}
-	
-	/***
-	 * Discard a whole group of cards all at once.
-	 * @param cards list of cards to be discarded.
-	 */
-	public void Discard(LinkedList<Card> cards)
-	{
-		hand.cards.removeAll(cards);
-		Game.log.push(new LogEntry(
-				LogEntry.Type.PLAYER_ACTION,
-				"Player " + name + " discards " + cards.size() + " cards."));
 	}
 	
 	/***

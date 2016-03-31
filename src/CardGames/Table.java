@@ -5,7 +5,7 @@ public class Table {
 	public static Dealer dealer;
 	public LinkedList<Player> players; //should include the dealer
 	public static double pot;
-	public static double ante;
+	private static double ante;
 	
 	public Table()
 	{
@@ -17,8 +17,8 @@ public class Table {
 		dealer = new Dealer(name, bank, deck);
 		players = new LinkedList<Player>();
 		this.players.add(dealer);
-		this.pot = 0;
-		this.ante = ante;
+		Table.pot = 0;
+		setAnte(ante);
 		Game.log.push(new LogEntry(
 				LogEntry.Type.GAME_ACTION, 
 				"A new table has been formed run by dealer " + dealer.name + "."));
@@ -48,5 +48,17 @@ public class Table {
 		Game.log.push(new LogEntry(
 				LogEntry.Type.GAME_ACTION,
 				"Player " + p.name + " has left the table."));
+	}
+	
+	public static void setAnte(double newAnte)
+	{
+		if ( newAnte < 0 )
+			throw new IllegalArgumentException("Ante must be a positive or zero.");
+		ante = newAnte;
+	} 
+	
+	public static double getAnte()
+	{
+		return ante;
 	}
 }
