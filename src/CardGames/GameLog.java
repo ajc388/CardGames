@@ -43,18 +43,10 @@ public class GameLog {
 	
 	/***
 	 * Write gamelog to file.
+	 * Not intended to save the state of the game...
 	 * TODO: implement
 	 */
 	public static void save()
-	{
-		
-	}
-	
-	/***
-	 * Load gamelog from file.
-	 * TODO: implement
-	 */
-	public static void load()
 	{
 		
 	}

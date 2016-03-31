@@ -1,12 +1,10 @@
 package Tests;
 
 import static org.junit.Assert.*;
-import java.util.LinkedList;
 import javax.activity.InvalidActivityException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import CardGames.Game;
 import CardGames.GameLog;
 import CardGames.LogEntry;
 import CardGames.Player;
@@ -14,19 +12,17 @@ import CardGames.Table;
 
 public class TestPlayer {
 	private Player p;
-	private Table table;
 	
 	@Before
 	public void setUp() throws Exception {
 		p = new Player("p1", 100);
 		p.inPlay = true;
-		table = new Table();
+		GameLog.add(LogEntry.Type.GAME_ACTION, "Initialized.");
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		p = null;
-		table = null;
 		Table.pot = 0;
 		GameLog.delete();
 	}
@@ -114,10 +110,10 @@ public class TestPlayer {
 	private void testRaise(double raise) throws Exception
 	{
 		p.bet(20); //adds a bet
-		assertEquals(20.0, table.pot, 0.01);
+		assertEquals(20.0, Table.pot, 0.01);
 		
 		p.raise(raise);
-		assertEquals(raise+40.0, table.pot, 0.01);
+		assertEquals(raise+40.0, Table.pot, 0.01);
 			
 		LogEntry e = GameLog.pop();
 		assertNotNull(e.date);
@@ -132,9 +128,9 @@ public class TestPlayer {
 	public void testCallOnBet() throws Exception
 	{
 		p.bet(20);
-		assertEquals(20.0 , table.pot, 0.0);
+		assertEquals(20.0 , Table.pot, 0.0);
 		p.call();
-		assertEquals(40.0, table.pot, 0.0);
+		assertEquals(40.0, Table.pot, 0.0);
 		
 		LogEntry e = GameLog.peek();
 		assertNotNull(e.date);
@@ -146,11 +142,11 @@ public class TestPlayer {
 	public void testCallOnRaise() throws Exception
 	{
 		p.bet(20);
-		assertEquals(20.0 , table.pot, 0.01);
+		assertEquals(20.0 , Table.pot, 0.01);
 		p.raise(20);
-		assertEquals(60.0, table.pot, 0.01);
+		assertEquals(60.0, Table.pot, 0.01);
 		p.call();
-		assertEquals(100.0, table.pot, 0.01);
+		assertEquals(100.0, Table.pot, 0.01);
 		
 		LogEntry e = GameLog.peek();
 		assertNotNull(e.date);
@@ -178,9 +174,9 @@ public class TestPlayer {
 	public void testCheck() throws Exception
 	{
 		p.bet(10);
-		assertEquals(10, table.pot, 0.01);
+		assertEquals(10, Table.pot, 0.01);
 		p.check();
-		assertEquals(10, table.pot, 0.01);
+		assertEquals(10, Table.pot, 0.01);
 		
 		LogEntry e = GameLog.peek();
 		assertNotNull(e.date);
@@ -195,12 +191,12 @@ public class TestPlayer {
 	public void testOptInCorrectPhase() throws Exception 
 	{
 		GameLog.add(LogEntry.Type.GAME_START, "Initialized for test.");
-		table.setAnte(5.0);
+		Table.setAnte(5.0);
 		p.inPlay = false;
 		assertFalse(p.inPlay);
 		
 		p.optIn();
-		assertEquals(5.0, table.pot, 0.01);
+		assertEquals(5.0, Table.pot, 0.01);
 		assertTrue(p.inPlay);
 		
 		LogEntry e = GameLog.peek();

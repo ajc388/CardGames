@@ -23,12 +23,11 @@ public class Table {
 	{
 		dealer = new Dealer(name, bank, deck);
 		players = new LinkedList<Player>();
-		this.players.add(dealer);
 		Table.pot = 0;
 		setAnte(ante);
 		GameLog.add(
 			LogEntry.Type.GAME_ACTION, 
-			"A new table has been formed run by dealer " + dealer.name + ".");
+			"A new table has been formed by dealer " + dealer.name + ".");
 	}
 	
 	public void newDealer(String name, double bank, Deck deck)
@@ -36,6 +35,7 @@ public class Table {
 		players.remove(dealer);
 		dealer = new Dealer(name, bank, deck);
 		players.add(dealer);
+		dealer.shuffle();
 		GameLog.add(
 			LogEntry.Type.GAME_ACTION,
 			"A new dealer " + name + " is running the table.");

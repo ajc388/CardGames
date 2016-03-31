@@ -1,19 +1,13 @@
 package Tests;
 
 import static org.junit.Assert.*;
-
-import java.util.LinkedList;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import CardGames.Card;
 import CardGames.Dealer;
 import CardGames.Deck;
-import CardGames.Game;
 import CardGames.GameLog;
-import CardGames.LogEntry;
 
 public class TestDealer {
 
@@ -61,19 +55,19 @@ public class TestDealer {
 	public void testDeal() throws Exception 
 	{
 		dealer.deck = new Deck();
-		dealer.deal(0, dealer);
+		dealer.deal(0, dealer, false);
 		assertEquals(0, dealer.cards.size());
 		
-		dealer.deal(1, dealer);
+		dealer.deal(1, dealer, false);
 		assertEquals(2, dealer.cards.size());
 		assertEquals(51, dealer.deck.cards.size());
 		
-		dealer.deal(5, dealer);
+		dealer.deal(5, dealer, false);
 		assertEquals(7, dealer.cards.size());
 		assertEquals(46, dealer.cards.size());
 		
 		//What happens if you draw too many cards... ?
-		dealer.deal(47, dealer);
+		dealer.deal(47, dealer, false);
 		assertEquals(6, dealer.cards.size());
 		
 		dealer.deck = null;

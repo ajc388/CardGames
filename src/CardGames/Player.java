@@ -208,7 +208,7 @@ public class Player {
 		if (!inPlay)
 			throw new InvalidActivityException("Player is not in play.");
 		
-		Table.dealer.deal(numOfCards, this); 
+		Table.dealer.deal(numOfCards, this, false); 
 		GameLog.add(
 				LogEntry.Type.PLAYER_ACTION,
 				"Player " + name + " requests " + numOfCards +".");

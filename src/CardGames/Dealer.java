@@ -1,5 +1,4 @@
 package CardGames;
-import java.util.LinkedList;
 
 public class Dealer extends Player {
 
@@ -23,17 +22,18 @@ public class Dealer extends Player {
 	 * @param player the player who should be dealt to.
 	 * @throws Exception
 	 */
-	public void deal(int numOfCards, Player player) throws Exception {
-		LinkedList<Card> cards = new LinkedList<Card>();
-			
+	public void deal(int numOfCards, Player player, boolean faceUp) throws Exception {
 		if (numOfCards > cards.size()) 
 			throw new Exception("Attempted to draw more cards than in the deck.");
 		else 
+		{
 			for ( int n = 0; n < numOfCards; n++ )
-				cards.add(cards.pop());
-			
-		player.cards.addAll(cards);
-		
+			{
+				Card card = cards.pop();
+				card.faceUp = faceUp;
+				player.cards.add(card);
+			}
+		}
 		GameLog.add(
 			LogEntry.Type.DEALER_ACTION,
 			"Dealer gives " + player.name + " " + numOfCards + " cards.");
