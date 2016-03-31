@@ -1,6 +1,13 @@
 package CardGames;
 import java.util.LinkedList;
 
+/***
+ * The table is the central part of the Casino Card game.
+ * Some variables may be set here as a configuration for 
+ * the whole game.
+ * @author sudoninja
+ *
+ */
 public class Table {
 	public static Dealer dealer;
 	public LinkedList<Player> players; //should include the dealer

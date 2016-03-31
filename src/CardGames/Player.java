@@ -19,7 +19,7 @@ public class Player {
 		this.name = name;
 		this.bank = bank;
 		this.hand = new Hand();
-		this.inPlay = true;
+		this.inPlay = false;
 	}
 	
 	//===========================================================
@@ -186,19 +186,19 @@ public class Player {
 	
 	
 	//=============================================================
-	//                       Player Actions
+	//                       Player Card Actions
 	//=============================================================
 	/***
 	 * A player can prompt the dealer to give him a number of cards.
-	 * @param numOfCards to be drawn from dealer.
+	 * @param numOfCards to be drawn from deck by dealer.
 	 * @throws Exception 
 	 */
 	public void RequestDraw(int numOfCards) throws Exception
 	{
+		Table.dealer.deal(numOfCards, this); 
 		Game.log.push(new LogEntry(
 				LogEntry.Type.PLAYER_ACTION,
 				"Player " + name + " requests " + numOfCards +"."));
-		Table.dealer.deal(numOfCards, this); 
 	}
 	
 	/***
@@ -215,8 +215,8 @@ public class Player {
 	
 	/***
 	 * Player quits this round and forfeits all bets.
-	 * Make sure the player is taken out of the turn rotate
-	 * for this game or is consistently skipped.
+	 * Make sure the player is taken out of the turn rotation
+	 * or is consistently skipped for this game.
 	 */
 	public void Fold()
 	{
