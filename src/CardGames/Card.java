@@ -1,5 +1,7 @@
 package CardGames;
 
+import java.util.Comparator;
+
 /***
  * A class that stores all data related to a Casino playing card.
  * @author sudoninja
@@ -8,6 +10,7 @@ public class Card {
 	
 	public String name;
 	public Suit suit;
+	public int rank;
 	public Color color;
 	public boolean faceUp;	
 	
@@ -32,9 +35,9 @@ public class Card {
 	 * @param name is the name of the card: "Ace", "Queen", "Jack", "One", etc...
 	 * @param suit any enumeration of suit.
 	 */
-	public Card(String name, Suit suit)
+	public Card(String name, Suit suit, int rank)
 	{
-		this(name, suit, false); //invokes the larger constructor
+		this(name, suit, rank, false); //invokes the larger constructor
 	}
 	
 	/***
@@ -43,10 +46,11 @@ public class Card {
 	 * @param suit is either a club, spade, diamond, or heart.
 	 * @param faceUp makes the card visible to other players.
 	 */
-	public Card(String name, Suit suit, boolean faceUp)
+	public Card(String name, Suit suit, int rank, boolean faceUp)
 	{
 		this.name = name;
 		this.suit = suit;
+		this.rank = rank;
 		if ( suit == Suit.CLUB || suit == Suit.SPADE )
 			this.color = Color.BLACK;
 		else
@@ -61,4 +65,11 @@ public class Card {
 	{
 		faceUp = (faceUp ? false: true);
 	}
+	
+	@Override
+	public String toString()
+	{
+		return name + " of " + suit.toString();
+	}
+	
 }

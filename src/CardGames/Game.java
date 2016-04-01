@@ -7,7 +7,7 @@ import java.util.Scanner;
  * @author sudoninja (aka ajc388)
  */
 public abstract class Game {
-	public Scanner sc;
+	private Scanner sc;
 	public boolean anotherGame;
 	Table table;
 	
@@ -18,34 +18,35 @@ public abstract class Game {
 		sc = new Scanner(System.in);
 	}
 	
-	/* TODO: implement the whole work flow of the card game. */
+	/* TODO: implement the work flow of the card game. */
 	public abstract void run();
 	
-	/* TODO:
-	 * This phase should encapsulate the setup of the game.
+	/** This phase should encapsulate the setup of the game.
 	 * During the first round the players should join
-	 * the table and pay an ante (if applicable) 
-	 * the dealer should then deal an appropriate amount of cards 
-	 * to the players hands. If you have a unique deck you will
-	 * need to overload this. */
+	 * the table and pay an ante (if applicable).
+	 * The deck will then be constructed and shuffled.
+	 * If you have a unique deck or the dealer is a player 
+	 * you will need to overload this. */
 	public void setup() {
+		//Query the console to remove players from the list.
 		for ( Player p : table.players )
 			queryRemovePlayers(p);
 		
+		//Query
 		queryNewPlayers();
 		
-		//Some players should opt in or out
+		//Query the console to opt in or out for the round.
 		for ( Player p : table.players)
 			queryOptInOut(p);
 		
 		//Dealer shuffles new deck
 		Table.dealer.deck = new Deck();
-		Table.dealer.shuffle();	
+		Table.dealer.shuffle();
 	}
 
-	/* Evaluate all players hands that are still inPlay
-	 * and determine who the winners are.
-	 * Pays out the pot to the winners. */
+	/** 
+	 * Evaluate all players hands that are still in play
+	 * to determine who the winners are. Pays out the pot to the winners. */
 	public void close() {
 		GameLog.add(LogEntry.Type.GAME_ACTION, "Closing out the game.");
 		LinkedList<Player> winners = evaluateCards();
@@ -61,16 +62,13 @@ public abstract class Game {
 		queryNewGame();
 	}
 	
-	/* TODO: 
-	 * Implement how the game evaluates points or ranks hands.
-	 * You may have multiple winners, add them to the list.
-	 * This implementation is entirely dependent by the game. */
-	public abstract LinkedList<Player> evaluateCards();
-	
-	/***
+	/**TODO: 
+	 * Implement how the game evaluates points for a player.
+	 * This implementation is entirely dependent on the game. */
+	public abstract LinkedList<Player> evaluateCards();	
+	/**
 	 * Ask all players for a bet.
-	 * @param players a given round of players
-	 */
+	 * @param players is a list of all players in the game. */
 	protected void bettingRound(LinkedList<Player> players)
 	{
 		GameLog.add(LogEntry.Type.BET_ACTION, "Start of a betting round");
@@ -79,7 +77,9 @@ public abstract class Game {
 				queryBetAction(p);
 	}
 	
-	
+	/**
+	 * Ask a player if he is in or out for the round.
+	 * @param p is a player in the players list. */
 	protected void queryOptInOut(Player p) {
 		System.out.println("Player " + p.name + " is in for this round? (IN , OUT)");
 		String response = sc.nextLine().trim().toUpperCase();
@@ -99,6 +99,10 @@ public abstract class Game {
 		}
 	}
 	
+	/**
+	 * Ask a player what type of bet action he wants
+	 * and how much he want to add to the pot.
+	 * @param p */
 	protected void queryBetAction(Player p) 
 	{
 		try {
@@ -127,6 +131,9 @@ public abstract class Game {
 		}
 	}
 	
+	/**
+	 * Ask the console if they want to play another round
+	 * of the game. */
 	protected void queryNewGame() 
 	{
 		System.out.println("Are you ready to play another game? (YES or NO)");
@@ -142,7 +149,8 @@ public abstract class Game {
 		}
 	}
 	
-
+	/**
+	 * Ask the console if new players should enter the table. */
 	protected void queryNewPlayers()
 	{
 		System.out.println("Do you want to create new players? (YES or NO)");
@@ -162,6 +170,10 @@ public abstract class Game {
 		}
 	}
 	
+	/**
+	 * Query the console to remove players from the table.
+	 * @param p is the specific player being queried.
+	 */
 	protected void queryRemovePlayers(Player p)
 	{
 		System.out.println("Remove " + p.name + " (YES or NO)?");

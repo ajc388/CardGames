@@ -1,4 +1,5 @@
 package CardGames;
+import java.util.Comparator;
 import java.util.LinkedList;
 
 /***
@@ -21,19 +22,19 @@ public class Deck {
 		
 		for ( Card.Suit suit : Card.Suit.values())
 		{
-			cards.add(new Card("Two", suit));
-			cards.add(new Card("Three", suit));
-			cards.add(new Card("Four", suit));
-			cards.add(new Card("Five", suit));
-			cards.add(new Card("Six", suit));
-			cards.add(new Card("Seven", suit));
-			cards.add(new Card("Eight", suit));
-			cards.add(new Card("Nine", suit));
-			cards.add(new Card("Ten", suit));
-			cards.add(new Card("Jack", suit));
-			cards.add(new Card("Queen", suit));
-			cards.add(new Card("King", suit));
-			cards.add(new Card("Ace", suit));
+			cards.add(new Card("Two", suit, 2));
+			cards.add(new Card("Three", suit, 3));
+			cards.add(new Card("Four", suit, 4));
+			cards.add(new Card("Five", suit, 5));
+			cards.add(new Card("Six", suit, 6));
+			cards.add(new Card("Seven", suit, 7));
+			cards.add(new Card("Eight", suit, 8));
+			cards.add(new Card("Nine", suit,9 ));
+			cards.add(new Card("Ten", suit, 10));
+			cards.add(new Card("Jack", suit, 11));
+			cards.add(new Card("Queen", suit, 12));
+			cards.add(new Card("King", suit, 13));
+			cards.add(new Card("Ace", suit, 14));
 		}
 	}
 	
@@ -45,4 +46,5 @@ public class Deck {
 	{
 		this.cards = cards;
 	}
+	
 }

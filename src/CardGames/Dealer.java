@@ -23,13 +23,13 @@ public class Dealer extends Player {
 	 * @throws Exception
 	 */
 	public void deal(int numOfCards, Player player, boolean faceUp) throws Exception {
-		if (numOfCards > cards.size()) 
+		if (numOfCards > deck.cards.size()) 
 			throw new Exception("Attempted to draw more cards than in the deck.");
 		else 
 		{
 			for ( int n = 0; n < numOfCards; n++ )
 			{
-				Card card = cards.pop();
+				Card card = deck.cards.pop();
 				card.faceUp = faceUp;
 				player.cards.add(card);
 			}

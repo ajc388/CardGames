@@ -241,4 +241,14 @@ public class Player {
 				LogEntry.Type.PLAYER_ACTION,
 				"Player " + name + " has folded.");
 	}
+
+	/**
+	 * Prints the whole set of cards held by the player.
+	 */
+	public String showCards(String str)
+	{
+		for (Card c : cards) 
+			str += c.toString() + "\n";
+		return str;
+	}
 }
