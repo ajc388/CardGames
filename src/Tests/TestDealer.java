@@ -60,7 +60,7 @@ public class TestDealer {
 		
 		dealer.deal(1, dealer, false);
 		assertEquals(2, dealer.cards.size());
-		assertEquals(51, dealer.deck.cards.size());
+		assertEquals(51, dealer.cards.size());
 		
 		dealer.deal(5, dealer, false);
 		assertEquals(7, dealer.cards.size());

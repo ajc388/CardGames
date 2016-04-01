@@ -11,6 +11,7 @@ import CardGames.LogEntry.Type;
 public class Player {
 	public String name;
 	public double bank;
+	public int rank;
 	public LinkedList<Card> cards;
 	public boolean inPlay;
 	

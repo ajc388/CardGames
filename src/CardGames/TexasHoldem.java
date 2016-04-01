@@ -3,7 +3,6 @@ package CardGames;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
-
 import CardGames.Card.Suit;
 
 public class TexasHoldem extends Game {
@@ -33,96 +32,150 @@ public class TexasHoldem extends Game {
 		}
 	}
 
+	/***
+	 * 
+	 * @param p
+	 * @return
+	 */
+	/*
+	 * 1.) Straight flush - all cards of same suit and straight
+	 *   	high card rank + 80 
+	 * 2.) 4 of a kind - 4 cards of a kind
+	 * 		high card rank + 70
+	 * 3.) Full house - 3 cards of a kind and a pair
+	 * 		high card rank + 60
+	 * 4.) Flush - all cards of same suit
+	 * 		high card rank + 50
+	 * 5.) Straight - all consecutive cards
+	 * 		high card rank + 40
+	 * 6.) 3 of a kind
+	 * 		high card rank + 30
+	 * 7.) Two pair
+	 * 		high card rank + 20
+	 * 7.) One pair
+	 * 		high card rank + 10
+	 * 8.) Highest rank card
+	 * 		high card rank
+	 */
+	private int evaluateHand(Player p)
+	{
+		p.cards.addAll(Table.dealer.cards);
+		int highVal = highCardRank(p.cards);
+		int [] cardCounts = new int[15];
+		int [] suitCounts = new int[4];
+		for ( Card c : p.cards ) 
+		{
+			if ( c.name.toUpperCase() == "ACE" )
+				cardCounts[0]++; //ace can be in either spot
+			cardCounts[c.rank]++;
+			suitCounts[c.suit.ordinal()]++;
+		}
+		
+		if ( isRoyalFlush(cardCounts, suitCounts) )
+			return  highVal + 108;
+		else if ( isFourOfAKind(cardCounts) )
+			return highVal + 94;
+		else if ( isFullHouse(cardCounts))
+			return highVal + 80;
+		else if ( isFlush(suitCounts) )
+			return highVal + 70;
+		else if ( isStraight(cardCounts) )
+			return highVal + 56;
+		else if ( isThreeOfAKind(cardCounts) )
+			return highVal + 42;
+		else if ( isTwoPair(cardCounts) )
+			return highVal + 28;
+		else if ( isTwoOfAKind(cardCounts) )
+			return highVal + 14;
+		else 
+			return highVal;
+		
+	}
+
+	private boolean isFlush(int[] suitCounts) {
+		for ( int i = 0; i < suitCounts.length; i++)
+			if ( suitCounts[i] == 5)
+				return true;
+		return false;
+	}
+
+	private boolean isStraight(int[] cardCounts) {
+		int consecutive = 0;
+		for (int i = 0; i < cardCounts.length; i++)
+		{
+			if ( cardCounts[i] > 0)
+				consecutive++;
+			else
+				consecutive = 0;
+		}
+		return consecutive == 5;
+	}
+
+	private boolean isTwoPair(int[] cardCounts) {
+		int pairs = 0;
+		for ( int i = 0; i < cardCounts.length; i++ )
+			if ( cardCounts[i] == 2 )
+				pairs++;
+		return pairs == 2;
+	}
+
+	private boolean isFullHouse(int[] cardCounts) {
+		return isThreeOfAKind(cardCounts) && isTwoOfAKind(cardCounts);
+	}
+
+	private boolean isTwoOfAKind(int[] cardCounts) {
+		for (int i = 0; i < cardCounts.length; i++)
+			if ( cardCounts[i] == 2 )
+				return true;
+		return false;
+	}
+
+	private boolean isThreeOfAKind(int[] cardCounts) {
+		for (int i = 0; i < cardCounts.length; i++)
+			if ( cardCounts[i] == 3 )
+				return true;
+		return false;
+	}
+
+	private boolean isFourOfAKind(int[] cardCounts) {
+		for (int i = 0; i < cardCounts.length; i++)
+			if ( cardCounts[i] == 4 )
+				return true;
+		return false;
+	}
+
+	private boolean isRoyalFlush(int[] cardCounts, int[] suitCounts) {
+		return isStraight(cardCounts) && isFlush(suitCounts);
+	}
+
+	private int highCardRank(LinkedList<Card> cards) {
+		Card highCard = cards.peek();
+		for ( Card c : cards)
+			if ( c.rank > highCard.rank )
+				highCard = c;
+		return highCard.rank;
+	}
+
+
 	@Override
 	public LinkedList<Player> evaluateCards() {
 		LinkedList<Player> winners = new LinkedList<Player>();
-		int [] rank = new int[table.players.size()];
-		int idx = 0;
+		
 		for ( Player p : table.players)
 		{
 			if ( p.inPlay )
 			{
-				rank[idx] = evaluateHand(p);
+				p.rank = evaluateHand(p);
 			}
-			else 
-			{
-				rank[idx] = 0;
-			}
-			idx++;
 		}
+		
+		
 		
 		return winners;
 	}
 	
-	private int evaluateHand(Player p)
-	{
-		p.cards.addAll(table.dealer.cards);
-		
-		Collections.sort(p.cards, new Comparator<Card>() { 
-			@Override
-	         public int compare(Card c1, Card c2) {
-	            if ( c1.rank < c2.rank )
-	            	return 1;
-	            else
-	            	return -1;
-	         }
-	     });
-		
-		System.out.println(p.showCards(""));
-		/*
-		 * 1.) Straight flush - all cards of same suit and straight
-		 * 2.) 4 of a kind - 4 cards of a kind
-		 * 3.) Full house - 3 cards of a kind and a pair
-		 * 4.) Flush - all cards of same suit
-		 * 5.) Straight - all consecutive cards
-		 * 6.) 3 of a kind
-		 * 7.) 2 of a kind
-		 * 8.) Highest rank card
-		 */
-//		boolean flush = isFlush();
-		
-	}
 	
-//	private boolean isPair(LinkedList<Card> cards)
-//	{
-//		for ( Card c : cards )
-//		{
-//		}
-//	}
-	
-	private boolean isFlush(LinkedList<Card> cards)
-	{
-		int clubs = 0;
-		int spades = 0;
-		int hearts = 0;
-		int diamonds = 0;
-		for (Card c : cards)
-		{
-			switch ( c.suit ) 
-			{
-				case CLUB:
-					clubs++;
-					break;
-				case DIAMOND:
-					diamonds++;
-					break;
-				case HEART:
-					hearts++;
-					break;
-				case SPADE:
-					spades++;
-					break;
-			}
-		}
-		if ( clubs >= 5 || 
-		     spades >= 5 ||  
-		     hearts >= 5 ||
-		     diamonds >= 5 )
-			return true;
-		else
-			return false;
-	}
-	
+
 	//===============================================
 	//			    CARD DEALING PHASES 
 	//===============================================

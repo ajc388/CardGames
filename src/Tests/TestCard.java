@@ -15,7 +15,7 @@ public class TestCard {
 	
 	@Before
 	public void setUp() throws Exception {
-		c = new Card("Ace", Suit.CLUB);
+		c = new Card("Ace", Suit.CLUB, 14);
 	}
 
 	@After
