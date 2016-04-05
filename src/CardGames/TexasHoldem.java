@@ -33,19 +33,20 @@ public class TexasHoldem extends Game {
 	public LinkedList<Player> rankPlayerCards() {
 		LinkedList<Player> winners = new LinkedList<Player>();
 		Player prev = table.players.peek();
-		for ( Player p : table.players)
+		for ( Player p : table.players )
 		{
 			if ( p.inPlay )
 			{
 				p.rank = evaluateHand(p);
-				if (p.rank >= prev.rank)
+				if (p.rank > prev.rank)
+				{
 					winners.add(p);
-				else
 					winners.remove(prev);
+				}
+				prev = p;
 			} else {
 				p.rank = 0;
 			}
-			prev = p;
 		}
 		return winners;
 	}
@@ -55,26 +56,6 @@ public class TexasHoldem extends Game {
 	 * the community cards.
 	 * @param p
 	 * @return
-	 */
-	/*
-	 * 1.) Straight flush - all cards of same suit and straight
-	 *   	high card rank + 80 
-	 * 2.) 4 of a kind - 4 cards of a kind
-	 * 		high card rank + 70
-	 * 3.) Full house - 3 cards of a kind and a pair
-	 * 		high card rank + 60
-	 * 4.) Flush - all cards of same suit
-	 * 		high card rank + 50
-	 * 5.) Straight - all consecutive cards
-	 * 		high card rank + 40
-	 * 6.) 3 of a kind
-	 * 		high card rank + 30
-	 * 7.) Two pair
-	 * 		high card rank + 20
-	 * 7.) One pair
-	 * 		high card rank + 10
-	 * 8.) Highest rank card
-	 * 		high card rank
 	 */
 	private int evaluateHand(Player p)
 	{
@@ -197,6 +178,7 @@ public class TexasHoldem extends Game {
 	private void dealFlop()
 	{
 		try {
+			Table.dealer.deck.cards.pop(); //burn card
 			Table.dealer.deal(3, Table.dealer, true);
 			Table.dealer.showCards("Community Cards (Flop)\n");
 			GameLog.add(LogEntry.Type.DEALER_ACTION, "The dealer has dealt the flop.");
@@ -208,6 +190,7 @@ public class TexasHoldem extends Game {
 	private void dealTurn()
 	{
 		try {
+			Table.dealer.deck.cards.pop(); //burn card
 			Table.dealer.deal(1, Table.dealer, true);
 			Table.dealer.showCards("Community Cards (Turn)\n");
 			GameLog.add(LogEntry.Type.DEALER_ACTION, "The dealer has dealt the turn.");
@@ -219,6 +202,7 @@ public class TexasHoldem extends Game {
 	private void dealRiver()
 	{
 		try {
+			Table.dealer.deck.cards.pop(); //burn card
 			Table.dealer.deal(1, Table.dealer, true);
 			Table.dealer.showCards("Community Cards (River)\n");
 			GameLog.add(LogEntry.Type.DEALER_ACTION, "The dealer has dealt the river.");

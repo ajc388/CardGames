@@ -11,7 +11,7 @@ public abstract class Game {
 	private Scanner sc;
 	public Table table;
 	protected boolean playAgain;
-	private boolean betOnTable;
+	private boolean currentBet;
 	
 	public Game()
 	{
@@ -86,12 +86,12 @@ public abstract class Game {
 			if ( p.inPlay )
 				queryBetAction(p);
 		
-		if ( betOnTable ) 
+		if ( currentBet ) 
 		{
 			for ( Player p : players )
 				if ( p.inPlay )
 					queryFinalBet(p);
-			betOnTable = false;
+			currentBet = false;
 		} 
 	}
 	
@@ -138,7 +138,7 @@ public abstract class Game {
 			
 			String response = sc.nextLine().trim().toUpperCase();
 			if ( response.equals("BET")) {
-				betOnTable = true;
+				currentBet = true;
 				p.bet(queryBetAmount(response)); 
 			} else if ( response.equals("CALL") ) {
 				p.call();
