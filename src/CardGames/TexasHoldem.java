@@ -6,12 +6,9 @@ import java.util.LinkedList;
 import CardGames.Card.Suit;
 
 public class TexasHoldem extends Game {
-	private Table table;
-	private boolean playAgain;
-	
 	public TexasHoldem()
 	{
-		table = new Table("Bob", 1000.0, new Deck(), 5.0);
+		table = new Table("Bob", 1000.0, new Deck(), 5.0, 5.0, 6);
 		playAgain = true;
 	}
 	
@@ -32,8 +29,30 @@ public class TexasHoldem extends Game {
 		}
 	}
 
+	@Override
+	public LinkedList<Player> rankPlayerCards() {
+		LinkedList<Player> winners = new LinkedList<Player>();
+		Player prev = table.players.peek();
+		for ( Player p : table.players)
+		{
+			if ( p.inPlay )
+			{
+				p.rank = evaluateHand(p);
+				if (p.rank >= prev.rank)
+					winners.add(p);
+				else
+					winners.remove(prev);
+			} else {
+				p.rank = 0;
+			}
+			prev = p;
+		}
+		return winners;
+	}
+	
 	/***
-	 * 
+	 * Evaluates the cards in texas holdem including
+	 * the community cards.
 	 * @param p
 	 * @return
 	 */
@@ -66,8 +85,8 @@ public class TexasHoldem extends Game {
 		for ( Card c : p.cards ) 
 		{
 			if ( c.name.toUpperCase() == "ACE" )
-				cardCounts[0]++; //ace can be in either spot
-			cardCounts[c.rank]++;
+				cardCounts[0]++; //ace can is rank 1 and 14
+			cardCounts[c.rank]++; //rank is 2 - 14 by default
 			suitCounts[c.suit.ordinal()]++;
 		}
 		
@@ -155,26 +174,6 @@ public class TexasHoldem extends Game {
 				highCard = c;
 		return highCard.rank;
 	}
-
-
-	@Override
-	public LinkedList<Player> evaluateCards() {
-		LinkedList<Player> winners = new LinkedList<Player>();
-		
-		for ( Player p : table.players)
-		{
-			if ( p.inPlay )
-			{
-				p.rank = evaluateHand(p);
-			}
-		}
-		
-		
-		
-		return winners;
-	}
-	
-	
 
 	//===============================================
 	//			    CARD DEALING PHASES 

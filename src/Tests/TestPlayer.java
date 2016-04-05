@@ -9,6 +9,7 @@ import CardGames.GameLog;
 import CardGames.LogEntry;
 import CardGames.Player;
 import CardGames.Table;
+import CardGames.LogEntry.Type;
 
 public class TestPlayer {
 	private Player p;
@@ -17,7 +18,8 @@ public class TestPlayer {
 	public void setUp() throws Exception {
 		p = new Player("p1", 100);
 		p.inPlay = true;
-		GameLog.add(LogEntry.Type.GAME_ACTION, "Initialized.");
+		Table.betMinimum = 0.0;
+		GameLog.add(LogEntry.Type.BET_ACTION, "Initialized.");
 	}
 
 	@After
@@ -30,10 +32,15 @@ public class TestPlayer {
 	//=========================================================
 	//				 	   TEST BET METHOD
 	//=========================================================
-	@Test(expected = IllegalArgumentException.class)
-	public void testZeroBet() throws Exception
+	public void testMinBet() throws Exception
 	{
-		testBet(0.0);
+		testBet(Table.betMinimum);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testMinBetEdge() throws Exception
+	{
+		testBet(Table.betMinimum-1);
 	}
 	
 	@Test
@@ -54,12 +61,13 @@ public class TestPlayer {
 		testBet(101.0);
 	}
 	
-	@Test(expected = InvalidActivityException.class)
+	@Test
 	public void testPreExistingBet() throws Exception
 	{
 		p.bet(20);//should be fine
 		assertEquals(20, Table.pot, 0.01);
 		p.bet(20); //throws error here
+		assertEquals(60, Table.pot, 0.01); //matches previous bet and raises
 	}
 	
 	private void testBet(double bet) throws Exception
@@ -72,116 +80,6 @@ public class TestPlayer {
 		assertNotNull(e.date);
 		assertEquals(LogEntry.Type.BET_ACTION, e.logType);
 		assertEquals(bet, e.amt, 0.01); //ensure no bet was logged		
-	}
-	
-	//===================================================
-	//				 TEST RAISE METHOD
-	//===================================================
-	@Test(expected = IllegalArgumentException.class)
-	public void testZeroRaise() throws Exception
-	{
-		testRaise(0.0);
-	}
-	
-	@Test
-	public void testStandardRaise() throws Exception
-	{
-		testRaise(20.0);
-	}
-	
-	@Test(expected = IllegalArgumentException.class)
-	public void testNegativeRaise() throws Exception
-	{
-		testRaise(-1.0);
-	}
-	
-	@Test(expected = IllegalArgumentException.class)
-	public void testExcessRaise() throws Exception
-	{
-		testRaise(101.0);
-	}
-	
-	@Test(expected = InvalidActivityException.class)
-	public void testRaiseNoBetAction() throws Exception
-	{
-		p.raise(20);
-	}
-	
-	private void testRaise(double raise) throws Exception
-	{
-		p.bet(20); //adds a bet
-		assertEquals(20.0, Table.pot, 0.01);
-		
-		p.raise(raise);
-		assertEquals(raise+40.0, Table.pot, 0.01);
-			
-		LogEntry e = GameLog.pop();
-		assertNotNull(e.date);
-		assertEquals(LogEntry.Type.BET_ACTION, e.logType);
-		assertEquals(raise+20.0, e.amt, 0.01); //ensure no bet was logged
-	}
-	
-	//===================================================
-	//		          TEST CALL METHOD
-	//===================================================
-	@Test
-	public void testCallOnBet() throws Exception
-	{
-		p.bet(20);
-		assertEquals(20.0 , Table.pot, 0.0);
-		p.call();
-		assertEquals(40.0, Table.pot, 0.0);
-		
-		LogEntry e = GameLog.peek();
-		assertNotNull(e.date);
-		assertEquals(LogEntry.Type.BET_ACTION, e.logType);
-		assertEquals(20.0, e.amt, 0.01);
-	}
-	
-	@Test
-	public void testCallOnRaise() throws Exception
-	{
-		p.bet(20);
-		assertEquals(20.0 , Table.pot, 0.01);
-		p.raise(20);
-		assertEquals(60.0, Table.pot, 0.01);
-		p.call();
-		assertEquals(100.0, Table.pot, 0.01);
-		
-		LogEntry e = GameLog.peek();
-		assertNotNull(e.date);
-		assertEquals(LogEntry.Type.BET_ACTION, e.logType);
-		assertEquals(40.0, e.amt, 0.01);
-	}
-	
-	@Test(expected = InvalidActivityException.class)
-	public void testCallNoAction() throws Exception
-	{
-		p.call();
-	}
-	
-	//==============================================
-	//				TEST CHECK METHOD
-	//==============================================
-	@Test(expected = InvalidActivityException.class)
-	public void testCheckNoBet() throws Exception
-	{
-		GameLog.add(LogEntry.Type.BET_ACTION, "Test");
-		p.check();
-	}
-	
-	@Test
-	public void testCheck() throws Exception
-	{
-		p.bet(10);
-		assertEquals(10, Table.pot, 0.01);
-		p.check();
-		assertEquals(10, Table.pot, 0.01);
-		
-		LogEntry e = GameLog.peek();
-		assertNotNull(e.date);
-		assertEquals(LogEntry.Type.BET_ACTION, e.logType);
-		assertEquals(0.0, e.amt, 0.01);
 	}
 	
 	//==============================================

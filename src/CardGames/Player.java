@@ -14,6 +14,7 @@ public class Player {
 	public int rank;
 	public LinkedList<Card> cards;
 	public boolean inPlay;
+	public double recentBet;
 	
 	public Player(String name, double bank)
 	{
@@ -27,7 +28,7 @@ public class Player {
 	//					   GAMBLING ACTIONS
 	//===========================================================
 	/***
-	 * A player can place a bet on the table.
+	 * A player can place a bet/raise action on the table.
 	 * @param amount
 	 * @throws Exception
 	 */
@@ -38,50 +39,21 @@ public class Player {
 			throw new InvalidActivityException("Player is not in play.");
 		else if ( e == null )
 			throw new NullPointerException();
-		else if ( e.logType == Type.BET_ACTION )
-			throw new InvalidActivityException("Player cannot use the bet method if there is an existing bet.");
-		else if (amount <= 0)
-			throw new IllegalArgumentException("Player cannot bet less than or equal to no money.");
-		else if ( amount > bank )
+		else if ( e.logType != Type.BET_ACTION )
+			throw new InvalidActivityException("Player cannot bet outside of a betting round.");
+		else if (amount < Table.betMinimum )
+			throw new IllegalArgumentException("Player cannot bet less than or to " + Table.betMinimum);
+		else if ( e.amt + amount > bank )
 			throw new IllegalArgumentException("Player does not have enough money to make the bet.");
 		else 
 		{
-			bank -= amount;
-			Table.pot += amount;
+			recentBet = amount + e.amt;
+			bank -= recentBet;
+			Table.pot += recentBet;
 			GameLog.add(
 					LogEntry.Type.BET_ACTION, 
-					"Player " + name + " bets " + amount + ".",
-					amount);
-		}
-	}
-	
-	/***
-	 * Player matches the money on the table and raises 
-	 * an additional amount of money.
-	 * @param amount
-	 * @throws Exception
-	 */
-	public void raise(double amount) throws Exception
-	{
-		LogEntry e = GameLog.peek(); // grab last betting action
-		if (!inPlay)
-			throw new InvalidActivityException("Player is not in play.");
-		else if ( e == null )
-			throw new NullPointerException();
-		else if ( e.logType != LogEntry.Type.BET_ACTION )
-			throw new InvalidActivityException("Player can only raise after a bet action.");
-		else if (amount <= 0)
-			throw new IllegalArgumentException("Player cannot raise less than or equal to no money.");
-		else if ( (amount+e.amt) > bank )
-			throw new IllegalArgumentException("Player does not have enough money to match and raise.");
-		else 
-		{
-			bank -= amount;
-			Table.pot += amount + e.amt;
-			GameLog.add(
-					LogEntry.Type.BET_ACTION,
-					"Player " + name + " matches bet and raises " + amount + ".",
-					amount + e.amt);
+					"Player " + name + " bets " + recentBet + ".",
+					recentBet + e.amt);
 		}
 	}
 	
@@ -101,34 +73,39 @@ public class Player {
 			throw new NullPointerException();
 		else if ( log.logType != LogEntry.Type.BET_ACTION )
 			throw new InvalidActivityException("Player can only call after a bet action.");
-		else 
+		else
 		{
-			bank -= log.amt;
-			Table.pot += log.amt;
+			recentBet = (log.amt - recentBet) > 0 ? log.amt - recentBet : 0;
+			bank -= recentBet;
+			Table.pot += recentBet;
 			GameLog.add(
 					LogEntry.Type.BET_ACTION,
-					"Player " + name + " matches the bet for " + log.amt + ".",
-					log.amt);
+					"Player " + name + " matches the bet.",
+					recentBet);
 		}
 	}
-	
-	/**
-	 * A played can decide not to add anything to the pot using
-	 * the check action.
-	 * @throws Exception throws exception if there is a bet on the table.
+
+	/***
+	 * Player quits this round and forfeits all bets.
+	 * Make sure the player is taken out of the turn rotation
+	 * or is consistently skipped for this game.
+	 * @throws Exception 
 	 */
-	public void check() throws Exception
+	public void Fold() throws Exception
 	{
 		LogEntry e = GameLog.peek();
-		if (!inPlay)
-			throw new InvalidActivityException("Player is not in play.");
-		else if ( e.amt <= 0 && e.logType == LogEntry.Type.BET_ACTION)
-			throw new InvalidActivityException("A player cannot check if there is a bet on the table.");
-		else 
+		if ( e == null )
+			throw new NullPointerException();
+		if ( e.logType != LogEntry.Type.BET_ACTION)
+			throw new InvalidActivityException("Player can only call after a bet action.");
+		else
 		{
+			cards = null;
+			inPlay = false;
 			GameLog.add(
 					LogEntry.Type.BET_ACTION,
-					"Player " + name + " checks.");
+					"Player " + name + " has folded.",
+					 e.amt);
 		}
 	}
 	
@@ -163,7 +140,7 @@ public class Player {
 	{
 		LogEntry e = GameLog.peek();
 		if ( e.logType != LogEntry.Type.GAME_START )
-			throw new InvalidActivityException("Player cannot opt out of th eround unless it's the start of a new round.");
+			throw new InvalidActivityException("Player cannot opt out of the round unless it's the start of a new round.");
 		else
 		{
 			inPlay = false;
@@ -228,20 +205,6 @@ public class Player {
 				LogEntry.Type.PLAYER_ACTION,
 				"Player " + name + " discards a card.");
 	}
-	
-	/***
-	 * Player quits this round and forfeits all bets.
-	 * Make sure the player is taken out of the turn rotation
-	 * or is consistently skipped for this game.
-	 */
-	public void Fold()
-	{
-		cards = null;
-		inPlay = false;
-		GameLog.add(
-				LogEntry.Type.PLAYER_ACTION,
-				"Player " + name + " has folded.");
-	}
 
 	/**
 	 * Prints the whole set of cards held by the player.
@@ -249,7 +212,7 @@ public class Player {
 	public String showCards(String str)
 	{
 		for (Card c : cards) 
-			str += c.toString() + "\n";
+			str += c.toString() + ", ";
 		return str;
 	}
 }

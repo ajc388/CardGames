@@ -42,16 +42,6 @@ public class GameLog {
 	}
 	
 	/***
-	 * Write gamelog to file.
-	 * Not intended to save the state of the game...
-	 * TODO: implement
-	 */
-	public static void save()
-	{
-		
-	}
-	
-	/***
 	 * Print the whole log from the most recent to the oldest entry.
 	 */
 	public static void printLog()
